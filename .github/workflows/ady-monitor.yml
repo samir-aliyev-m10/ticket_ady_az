@@ -41,3 +41,11 @@ jobs:
           ADY_READY_TIMEOUT_MS: '120000'
           SUMMARY_EVERY_POLL: 'true'
         run: npm start -- --once
+      
+      - name: Upload ADY debug screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ady-debug
+          path: ady-debug.png
+          if-no-files-found: ignore     
