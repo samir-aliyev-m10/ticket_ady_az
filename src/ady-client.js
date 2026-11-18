@@ -138,9 +138,32 @@ export class ADYClient {
       waitUntil: "domcontentloaded",
       timeout: 60000
     });
-    await this.page.waitForFunction(() => window.grecaptcha && window.g_token, null, {
-      timeout: this.readyTimeoutMs
-    });
+    console.log("[DEBUG] URL:", this.page.url());
+
+console.log("[DEBUG] Title:", await this.page.title());
+
+console.log(
+  "[DEBUG] reCAPTCHA:",
+  await this.page.evaluate(() => ({
+    grecaptcha: !!window.grecaptcha,
+    g_token: !!window.g_token
+  }))
+);
+
+try {
+  await this.page.waitForFunction(
+    () => window.grecaptcha && window.g_token,
+    null,
+    { timeout: this.readyTimeoutMs }
+  );
+} catch (error) {
+  await this.page.screenshot({
+    path: "ady-debug.png",
+    fullPage: true
+  });
+
+  throw error;
+}
   }
 
   async close() {
