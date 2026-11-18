@@ -1,0 +1,43 @@
+
+name: ADY Ticket Monitor
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-tickets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Validate code
+        run: npm run check
+
+      - name: Check ADY tickets
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          WATCH_DATES: ${{ vars.WATCH_DATES }}
+          LIST_CHECK_DAYS: '12'
+          HEADLESS: 'true'
+          ADY_READY_TIMEOUT_MS: '120000'
+          SUMMARY_EVERY_POLL: 'true'
+        run: npm start -- --once
